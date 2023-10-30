@@ -1,12 +1,19 @@
 using Core.Context;
 using Core.Entities;
+using EcommerceApp.HandelResponses;
 using EcommerceApp.Helper;
+using EcommerceApp.Middlewares;
 using InfraStructure;
 using InfraStructure.Interfaces;
 using InfraStructure.Repositories;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Services.Interfaces;
-using Services.Services;
+using Services.Services.ProductService;
+
+using Services.Services.ProductService.Dto;
+using EcommerceApp.Extensions;
+using StackExchange.Redis;
+using Core.IdentityEntities;
 
 namespace EcommerceApp
 {
@@ -23,12 +30,21 @@ namespace EcommerceApp
             {
                 options.UseSqlServer(builder.Configuration.GetConnectionString("StoreConnection"));
             });
+            builder.Services.AddDbContext<AppIdentityDbContext>(options =>
+            {
+                options.UseSqlServer(builder.Configuration.GetConnectionString("IdentityConnection"));
+            });
 
-            builder.Services.AddScoped<IProductRepository, ProductRepository>();
-            builder.Services.AddScoped(typeof(IGenericRepository<>),typeof(GenericRepository<>));
-            builder.Services.AddScoped<IUnitOfWorkRepository,UnitOfWorkRepository>();
-            builder.Services.AddScoped<IProductService, ProductService>();
+            builder.Services.AddSingleton<IConnectionMultiplexer>(config =>
+            {
+                var configuration = ConfigurationOptions.Parse(builder.Configuration.GetConnectionString("Redis"),true);
 
+                return ConnectionMultiplexer.Connect(configuration);
+            });
+            
+
+            builder.Services.AddApplicationServices();
+            builder.Services.AddIdentityServiceExtention();
 
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
@@ -43,15 +59,13 @@ namespace EcommerceApp
             {
                 app.UseSwagger();
                 app.UseSwaggerUI();
+                app.UseMiddleware<ExceptionMiddleware>();
             }
-
+            app.UseStaticFiles();
             app.UseHttpsRedirection();
-
             app.UseAuthorization();
-
-
+            app.UseAuthentication();
             app.MapControllers();
-
             app.Run();
         }
     }

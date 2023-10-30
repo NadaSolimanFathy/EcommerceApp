@@ -19,10 +19,53 @@ namespace InfraStructure.Specification
 
         public List<Expression<Func<T, object>>> Includes { get; }=new List<Expression<Func<T, object>>>();
 
+       
 
         protected void AddInclude(Expression<Func<T, object>> includeExpression)
         {
             Includes.Add(includeExpression);
         }
+
+
+        #region Ordering
+
+        public Expression<Func<T, object>> OrderBy { get; private set; }
+
+        public Expression<Func<T, object>> OrderByDescending { get; private set; }
+
+
+
+        protected void AddOrderBy(Expression<Func<T, object>> orderBy)
+        {
+            OrderBy = orderBy;
+        }
+        protected void AddOrderByDescending(Expression<Func<T, object>> orderByDescending)
+        {
+            OrderByDescending = orderByDescending;
+        } 
+        #endregion
+
+
+
+
+        #region Pagination 
+        public int Take { get; private set; }
+
+    public int Skip { get; private set; }
+
+        public bool IsPaginated { get; private set; }
+
+
+        protected void ApplyPagination(int skip,int take)
+        {
+            Take = take;
+            Skip = skip;
+            IsPaginated = true;
+        }
+        #endregion
+
+
+
+
     }
 }

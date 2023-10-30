@@ -1,5 +1,7 @@
 ﻿using Core.Context;
+using Core.IdentityEntities;
 using InfraStructure;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace EcommerceApp.Helper
@@ -20,8 +22,12 @@ namespace EcommerceApp.Helper
                 try
                 {
                     var context = services.GetRequiredService<StoreDbContext>();
+                    var identityContext = services.GetRequiredService<AppIdentityDbContext>();
+                    var userManager = services.GetRequiredService<UserManager<AppUser>>();
+
                     await context.Database.MigrateAsync();
                     await StoreContextSeed.SeedAsync(context, loggerFactory);
+                    await AppIdentityContextSeed.SeedUserAsync(userManager);
                 }
                 catch (Exception ex)
                 {

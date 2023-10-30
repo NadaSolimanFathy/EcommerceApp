@@ -69,6 +69,22 @@ namespace InfraStructure
                     }
                  
                 }
+                if (context.DeliveryMethods != null && !context.DeliveryMethods.Any())
+                {
+                    var deliveryMethodsData = File.ReadAllText("../InfraStructure/SeedData/delivery.json");
+                    //                                       retuen               source   
+                    var deliveryMethods = JsonSerializer.Deserialize<List<DeliveryMethod>>(deliveryMethodsData);
+
+                    if (deliveryMethods != null)
+                    {
+                        foreach (var method in deliveryMethods)
+                        {
+                            await context.DeliveryMethods.AddAsync(method);
+                        }
+                        await context.SaveChangesAsync();
+                    }
+
+                }
 
             }
             catch (Exception ex)

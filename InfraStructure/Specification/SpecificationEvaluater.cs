@@ -15,6 +15,16 @@ namespace InfraStructure.Specification
 
             if(specifications.Criteria is not null)
                 query=query.Where(specifications.Criteria);
+            if (specifications.OrderBy is not null)
+                query = query.OrderBy(specifications.OrderBy);
+            if (specifications.OrderByDescending is not null)
+                query = query.OrderByDescending(specifications.OrderByDescending);
+
+            if (specifications.IsPaginated)
+            {
+                query=query.Skip(specifications.Skip).Take(specifications.Take);
+            }
+
 
             query = specifications.Includes.Aggregate(query, (current, include) =>
             current.Include(include));
